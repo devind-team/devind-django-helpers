@@ -22,7 +22,7 @@ redis = "^4.1.4"
 Django = "^4.0.2"
 graphene-django = "^2.15.0"
 inflection = "^0.5.1"
-graphene-django-optimizer = "^0.9.1"
+graphene-django-optimizer = "^0.8.0"
 flatten-dict = "^0.4.2"
 openpyxl = "^3.0.9"
 
