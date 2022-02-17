@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2022-02-17)
+### Fix
+* Change depend django ([`bfe3a4d`](https://github.com/devind-team/devind-django-helpers/commit/bfe3a4d28861d18a60cac7c642ec16f11f66d57c))
+
 ## v0.2.0 (2022-02-17)
 ### Feature
 * Added base mutation and some types (errors) ([`e4f0e88`](https://github.com/devind-team/devind-django-helpers/commit/e4f0e889c3415b9b18a8cc8bb74c445bb14e9da3))
