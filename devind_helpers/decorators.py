@@ -1,4 +1,5 @@
-"""Модуль с декораторами"""
+"""Модуль с декораторами."""
+
 from functools import wraps
 from typing import Type, Callable, Iterable, Union, Optional, Any
 
@@ -77,7 +78,7 @@ def validation_classes(
     :param deferred: является ли применение валидации отложенным
     """
 
-    from devind_core.schema.types import ErrorFieldType
+    from devind_helpers.schema.types import ErrorFieldType
 
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
