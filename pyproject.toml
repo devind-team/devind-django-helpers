@@ -19,7 +19,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.9"
 redis = "^4.1.4"
-Django = "^3.2.12"
+Django = ">=3.2.12,<5.0.0"
 graphene-django = "^2.15.0"
 inflection = "^0.5.1"
 graphene-django-optimizer = "^0.8.0"
