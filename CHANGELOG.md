@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-03-08)
+### Feature
+* Add connection class with totalCount ([`0593433`](https://github.com/devind-team/devind-django-helpers/commit/059343305d717588de68a8a201401c93d2cbd600))
+
 ## v0.2.1 (2022-02-17)
 ### Fix
 * Change depend django ([`bfe3a4d`](https://github.com/devind-team/devind-django-helpers/commit/bfe3a4d28861d18a60cac7c642ec16f11f66d57c))
