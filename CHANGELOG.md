@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-04-22)
+### Feature
+* Add gid2int ([`ba4696c`](https://github.com/devind-team/devind-django-helpers/commit/ba4696c4755495f4fec25368f702e91bc7c8804b))
+
 ## v0.3.0 (2022-03-08)
 ### Feature
 * Add connection class with totalCount ([`0593433`](https://github.com/devind-team/devind-django-helpers/commit/059343305d717588de68a8a201401c93d2cbd600))
