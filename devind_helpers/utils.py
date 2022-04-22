@@ -8,6 +8,16 @@ from typing import Optional, Tuple, Union
 from graphql_relay import from_global_id
 
 
+def gid2int(gid: Union[str, int]) -> Optional[int]:
+    try:
+        return int(gid)
+    except ValueError:
+        try:
+            return int(from_global_id(gid)[1])
+        except TypeError:
+            return None
+
+
 def from_gid_or_none(global_id: Optional[str]) -> Tuple[Optional[str], Optional[int]]:
     """Возвращает None в случае ошибки парсинга."""
     if not global_id:
