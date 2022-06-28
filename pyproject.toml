@@ -18,13 +18,12 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-redis = "^4.1.4"
+redis = "^4.3.4"
 Django = "^4.0.2"
-graphene-django = "^2.15.0"
 inflection = "^0.5.1"
-graphene-django-optimizer = "^0.9.1"
 flatten-dict = "^0.4.2"
-openpyxl = "^3.0.9"
+openpyxl = "^3.0.10"
+graphql-core = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 

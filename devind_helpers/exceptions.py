@@ -24,7 +24,7 @@ class GraphQLError(BaseGraphQLError):
 
 
 class PermissionDenied(GraphQLError):
-    """Ошибка отсуствия прав."""
+    """Ошибка отсутствия прав."""
 
     status: int = '403'
     message: str = 'У Вас недостаточно прав для совершения данного действия'

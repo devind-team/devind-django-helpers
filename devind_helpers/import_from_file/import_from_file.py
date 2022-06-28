@@ -9,11 +9,10 @@ from .csv_reader import CsvReader
 from .excel_reader import ExcelReader
 from .json_reader import JsonReader
 from .ratio import Ratio
-from ..validator import Validator
+
 
 Errors = dict[str, dict[str, str]]
 ItemError = tuple[int, Errors]
-Relative = tuple[Type[Validator], Type[models.Model]]
 
 
 Model = TypeVar('Model', bound=models.Model)
@@ -63,8 +62,6 @@ class ImportFromFile(Generic[Model]):
             self,
             model: Type[Model],
             path: str,
-            validator: Optional[Type[Validator]] = None,
-            relative: Optional[dict[str, Relative]] = None,
             introduction: Optional[dict] = None,
             ratio: Ratio = None,
             required_keys: Optional[list[str]] = None):
@@ -72,22 +69,17 @@ class ImportFromFile(Generic[Model]):
 
         :param model: модель
         :param path: путь к файлу
-        :param validator: валидатор
-        :param relative: данные связанного элемента
         :param introduction: дополнительные данные
         :param ratio: отображение полей
         :param required_keys: обязательные ключи для формирования таблицы
         """
         self.model = model
         self.initial_items: list[dict] = [*self._readers[splitext(path)[1]](path).items]
-        self.validator = validator
-        self.relative = relative
         self.introduction = introduction
         self.ratio = ratio
         self.required_keys = required_keys
         self.separated_keys: Optional[list[str]] = None
         self.separated_ratio: Optional[Ratio] = None
-        self.separated_validator: Optional[Type[Validator]] = None
 
     @property
     def items(self) -> list[dict]:
@@ -130,46 +122,14 @@ class ImportFromFile(Generic[Model]):
 
     def separate(self,
                  keys: Iterable[str],
-                 ratio: Optional[Ratio] = None,
-                 validator: Optional[Type[Validator]] = None) -> None:
-        """Отоделение некоторых полей для специфической записи в базу данных.
+                 ratio: Optional[Ratio] = None) -> None:
+        """Отделение некоторых полей для специфической записи в базу данных.
 
         :param keys: ключи, которые необходимо отделить
         :param ratio: отображение полей
-        :param validator: валидатор для проверки отделенных данных
         """
-
         self.separated_keys = keys
         self.separated_ratio = ratio
-        self.separated_validator = validator
-
-    def validate(self) -> tuple[bool, Optional[list[ItemError]]]:
-        """Валидация элементов.
-
-        :return: (успех валидации, список ошибок валидации элементов)
-        """
-
-        status = True
-        errors: list[ItemError] = []
-        if self.validator:
-            for i, item in enumerate(self.items):
-                data = self._modify_item(item)
-                validator = self.validator(data)
-                status = validator.validate()
-                related_status, related_errors = self._validate_related(
-                    {k: v for k, v in item.items() if isinstance(v, dict)}
-                )
-                if not (status and related_status):
-                    errors.append((i, {**validator.get_message(), **related_errors},))
-                    status = False
-        if self.separated_items and self.separated_validator:
-            for i, separated_item in enumerate(self.separated_items):
-                separated_data = self._modify_separated_item(separated_item)
-                separated_validator = self.separated_validator(separated_data)
-                if not separated_validator.validate():
-                    errors.append((i, separated_validator.get_message()))
-                    status = False
-        return status, errors
 
     @transaction.atomic
     def run(

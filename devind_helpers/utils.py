@@ -3,19 +3,7 @@
 from argparse import ArgumentTypeError
 from random import choice
 from string import ascii_letters
-from typing import Optional, Tuple, Union
-
-from graphql_relay import from_global_id
-
-
-def from_gid_or_none(global_id: Optional[str]) -> Tuple[Optional[str], Optional[int]]:
-    """Возвращает None в случае ошибки парсинга."""
-    if not global_id:
-        return None, None
-    try:
-        return from_global_id(global_id)
-    except TypeError:
-        return None, None
+from typing import Optional, Union
 
 
 def random_string(count: int) -> str:
