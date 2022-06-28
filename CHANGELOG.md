@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2022-06-28)
+### Breaking
+* graphene_django has been removed.  ([`22ae658`](https://github.com/devind-team/devind-django-helpers/commit/22ae6587eb158e6fb0326e2b37122cbf8d0fe5ee))
+
+### Performance
+* Remove graphene_django instead strawberry ([`22ae658`](https://github.com/devind-team/devind-django-helpers/commit/22ae6587eb158e6fb0326e2b37122cbf8d0fe5ee))
+
 ## v0.4.0 (2022-04-22)
 ### Feature
 * Add gid2int ([`ba4696c`](https://github.com/devind-team/devind-django-helpers/commit/ba4696c4755495f4fec25368f702e91bc7c8804b))
