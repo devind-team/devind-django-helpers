@@ -24,6 +24,7 @@ inflection = "^0.5.1"
 flatten-dict = "^0.4.2"
 openpyxl = "^3.0.10"
 graphql-core = "^3.2.1"
+strawberry-django-plus = "^1.17.0"
 
 [tool.poetry.dev-dependencies]
 

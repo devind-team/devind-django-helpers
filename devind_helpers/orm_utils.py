@@ -3,8 +3,8 @@
 from typing import Type, Union, Optional, Protocol
 
 from django.db.models import Model, Manager, QuerySet
+from django.core.exceptions import ObjectDoesNotExist
 
-from devind_helpers.exceptions import NotFound
 
 __all__ = ('get_object_or_404', 'get_object_or_none',)
 
@@ -27,7 +27,7 @@ def get_object_or_404(klass: Union[Type[Model], Manager, QuerySet], *args, **kwa
     try:
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
-        raise NotFound()
+        raise ObjectDoesNotExist(f'Объект {klass.__name__} не найден')
 
 
 def get_object_or_none(klass: Union[Type[Model], Manager, QuerySet], *args, **kwargs) -> Optional[Model]:
