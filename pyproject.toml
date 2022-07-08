@@ -7,7 +7,7 @@ license = "MIT"
 readme = "readme.md"
 homepage = "https://github.com/devind-team/devind-django-helpers"
 repository = "https://github.com/devind-team/devind-django-helpers"
-keywords = ["django", "graphene", "helpers"]
+keywords = ["django", "helpers"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -24,6 +24,7 @@ inflection = "^0.5.1"
 flatten-dict = "^0.4.2"
 openpyxl = "^3.0.10"
 graphql-core = "^3.2.1"
+strawberry-django-plus = "^1.17.0"
 
 [tool.poetry.dev-dependencies]
 

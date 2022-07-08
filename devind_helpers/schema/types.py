@@ -1,59 +1,44 @@
-from typing import Dict, List
+import enum
+from strawberry_django_plus import gql
 
-import graphene
 from flatten_dict import flatten
-from graphene import ObjectType
+
 
 from devind_helpers.import_from_file import ImportFromFile
 
 
-class ErrorFieldType(ObjectType):
-    """Ошибка в поле формы"""
-
-    field = graphene.String(required=True, description='Поле формы')
-    messages = graphene.List(graphene.NonNull(graphene.String), required=True, description='Ошибки')
-
-    @classmethod
-    def from_validator(cls, messages: Dict[str, Dict[str, str]]) -> List['ErrorFieldType']:
-        """Получение ошибок из валидатора."""
-
-        return [cls(field=field, messages=msg.values()) for field, msg in messages.items()]
-
-    @classmethod
-    def from_messages_dict(cls, message_dict: Dict[str, List[str]]) -> List['ErrorFieldType']:
-        """Получение ошибок из словаря сообщений ValidationError."""
-
-        return [cls(field=field, messages=values) for field, values in message_dict.items()]
-
-
-class RowFieldErrorType(ObjectType):
+@gql.type
+class RowFieldErrorType:
     """Ошибка в строке."""
 
-    row = graphene.Int(required=True, description='Номер строки с ошибкой')
-    errors = graphene.List(ErrorFieldType, required=True, description='Ошибки, возникающие в строке')
+    row: int = gql.field(description='Номер строки с ошибкой')
+    errors: list[gql.OperationMessage] = gql.field(description='Ошибки, возникающие в строке')
 
 
-class TableCellType(ObjectType):
+@gql.type
+class TableCellType:
     """Ячейка документа."""
 
-    header = graphene.String(required=True, description='Заголовок ячейки')
-    value = graphene.String(default_value='-', description='Значение ячейки')
-    align = graphene.String(default_value='left', description='Выравнивание')
-    type = graphene.String(default_value='string', description='Тип ячейки')
+    header: str = gql.field(description='Заголовок ячейки')
+    value: str = gql.field(default='-', description='Значение ячейки')
+    align: str = gql.field(default='left', description='Выравнивание')
+    type: str = gql.field(default='string', description='Тип ячейки')
 
 
-class TableRowType(ObjectType):
+@gql.type
+class TableRowType:
     """Строка документа."""
 
-    index = graphene.Int(required=True, description='Индекс строки')
-    cells = graphene.List(TableCellType, required=True, description='Строка документа')
+    index: int = gql.field(description='Индекс строки')
+    cells: list[TableCellType] = gql.field(description='Строка документа')
 
 
-class TableType(ObjectType):
+@gql.type
+class TableType:
     """Документ, представлющий собой таблицу."""
 
-    headers = graphene.List(graphene.String, required=True, description='Заголовки документа')
-    rows = graphene.List(TableRowType, required=True, description='Строки документа')
+    headers: list[str] = gql.field(description='Заголовки документа')
+    rows: list[TableRowType] = gql.field(description='Строки документа')
 
     @classmethod
     def from_iff(cls, iff: ImportFromFile):
@@ -62,22 +47,24 @@ class TableType(ObjectType):
         :param iff: класс импорта данных из файла
         """
 
-        rows: List[TableRowType] = []
+        rows: list[TableRowType] = []
         for index, item in enumerate(iff.initial_items):
             r = flatten(item, reducer='dot')
             rows.append(TableRowType(index=index, cells=[TableCellType(header=k, value=v) for k, v in r.items()]))
         return cls(headers=iff.all_keys, rows=rows)
 
 
-class SetSettingsInputType(graphene.InputObjectType):
+@gql.input
+class SetSettingsInputType:
     """Настройка для установки."""
 
-    key = graphene.String(required=True, description='Ключ настройки')
-    value = graphene.String(required=True, description='Значение настройки')
-    user_id = graphene.ID(description='Пользователь к которому применяется настройка')
+    key: str = gql.field(description='Ключ настройки')
+    value: str = gql.field(description='Значение настройки')
+    user_id: gql.ID = gql.field(description='Пользователь к которому применяется настройка')
 
 
-class ActionRelationShip(graphene.Enum):
+@gql.enum
+class ActionRelationShip(enum.Enum):
     """Типы измнения связей между записями в базе данных
         - ADD - Добавление
         - DELETE - Удаление
@@ -87,7 +74,8 @@ class ActionRelationShip(graphene.Enum):
     DELETE = 2
 
 
-class ConsumerActionType(graphene.Enum):
+@gql.enum
+class ConsumerActionType(enum.Enum):
     """Типы уведомления пользователей
         - CONNECT - Присоединился
         - DISCONNECT - Отсоединился
