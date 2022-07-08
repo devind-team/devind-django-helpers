@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2022-07-08)
+### Fix
+* Перенос типов на strawberry ([`6b54934`](https://github.com/devind-team/devind-django-helpers/commit/6b54934c831fdd46d775e8b8c926fdae1aae6f4e))
+
 ## v1.0.0 (2022-06-28)
 ### Breaking
 * graphene_django has been removed.  ([`22ae658`](https://github.com/devind-team/devind-django-helpers/commit/22ae6587eb158e6fb0326e2b37122cbf8d0fe5ee))
