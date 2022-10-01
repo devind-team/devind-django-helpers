@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2022-10-01)
+### Feature
+* Обновление версии semantic release ([`2fda58d`](https://github.com/devind-team/devind-django-helpers/commit/2fda58dd02386ce69f3431e6bae5cfabd10be202))
+
 ## v0.4.0 (2022-04-22)
 ### Feature
 * Add gid2int ([`ba4696c`](https://github.com/devind-team/devind-django-helpers/commit/ba4696c4755495f4fec25368f702e91bc7c8804b))
