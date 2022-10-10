@@ -1,4 +1,5 @@
 """Модуль со вспомогательными функциями."""
+import re
 
 from argparse import ArgumentTypeError
 from random import choice
@@ -55,3 +56,8 @@ def convert_str_to_int(value: Optional[Union[str, bytes]]) -> Optional[int]:
         return int(value)
     except ValueError:
         return None
+
+
+def is_template(text: str) -> bool:
+    """Поиск шаблона в строке"""
+    return bool(re.findall('{{ .*? }}', text))
