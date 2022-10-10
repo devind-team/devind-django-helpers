@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2022-10-10)
+### Feature
+* Добавлена функция поиска шаблона в строке ([`04e2ab3`](https://github.com/devind-team/devind-django-helpers/commit/04e2ab375e6c7218e08743f6174a2197b5a26251))
+
 ## v0.5.0 (2022-10-01)
 ### Feature
 * Обновление версии semantic release ([`2fda58d`](https://github.com/devind-team/devind-django-helpers/commit/2fda58dd02386ce69f3431e6bae5cfabd10be202))
