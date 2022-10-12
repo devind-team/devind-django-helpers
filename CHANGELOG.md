@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2022-10-12)
+### Feature
+* В базовую мутацию была добавлена автоматическая обработка ошибки ValidationError ([`e4374f2`](https://github.com/devind-team/devind-django-helpers/commit/e4374f2f27d314b8d6bee46af710d2ee663ee863))
+
 ## v0.6.0 (2022-10-10)
 ### Feature
 * Добавлена функция поиска шаблона в строке ([`04e2ab3`](https://github.com/devind-team/devind-django-helpers/commit/04e2ab375e6c7218e08743f6174a2197b5a26251))
