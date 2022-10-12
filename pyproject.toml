@@ -15,7 +15,6 @@ classifiers = [
     "Framework :: Django"
 ]
 
-
 [tool.poetry.dependencies]
 python = "^3.9"
 redis = "^4.1.4"
