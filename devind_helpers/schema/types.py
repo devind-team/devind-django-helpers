@@ -1,4 +1,5 @@
-from typing import Dict, List
+"""Вспомогательные типы."""
+from typing import Iterable, cast
 
 import graphene
 from flatten_dict import flatten
@@ -8,21 +9,23 @@ from devind_helpers.import_from_file import ImportFromFile
 
 
 class ErrorFieldType(ObjectType):
-    """Ошибка в поле формы"""
+    """Ошибка в поле формы."""
 
     field = graphene.String(required=True, description='Поле формы')
     messages = graphene.List(graphene.NonNull(graphene.String), required=True, description='Ошибки')
 
-    @classmethod
-    def from_validator(cls, messages: Dict[str, Dict[str, str]]) -> List['ErrorFieldType']:
-        """Получение ошибок из валидатора."""
+    def __eq__(self, other: 'ErrorFieldType') -> bool:
+        """Сравнение по атрибутам."""
+        return self.field == other.field and list(cast(Iterable, self.messages)) == list(cast(Iterable, other.messages))
 
+    @classmethod
+    def from_validator(cls, messages: dict[str, dict[str, str]]) -> list['ErrorFieldType']:
+        """Получение ошибок из валидатора."""
         return [cls(field=field, messages=msg.values()) for field, msg in messages.items()]
 
     @classmethod
-    def from_messages_dict(cls, message_dict: Dict[str, List[str]]) -> List['ErrorFieldType']:
+    def from_messages_dict(cls, message_dict: dict[str, list[str]]) -> list['ErrorFieldType']:
         """Получение ошибок из словаря сообщений ValidationError."""
-
         return [cls(field=field, messages=values) for field, values in message_dict.items()]
 
 
@@ -50,7 +53,7 @@ class TableRowType(ObjectType):
 
 
 class TableType(ObjectType):
-    """Документ, представлющий собой таблицу."""
+    """Документ, представляющий собой таблицу."""
 
     headers = graphene.List(graphene.String, required=True, description='Заголовки документа')
     rows = graphene.List(TableRowType, required=True, description='Строки документа')
@@ -58,11 +61,9 @@ class TableType(ObjectType):
     @classmethod
     def from_iff(cls, iff: ImportFromFile):
         """Получение из класса импорта данных из файла.
-
         :param iff: класс импорта данных из файла
         """
-
-        rows: List[TableRowType] = []
+        rows: list[TableRowType] = []
         for index, item in enumerate(iff.initial_items):
             r = flatten(item, reducer='dot')
             rows.append(TableRowType(index=index, cells=[TableCellType(header=k, value=v) for k, v in r.items()]))
@@ -78,7 +79,7 @@ class SetSettingsInputType(graphene.InputObjectType):
 
 
 class ActionRelationShip(graphene.Enum):
-    """Типы измнения связей между записями в базе данных
+    """Типы изменения связей между записями в базе данных
         - ADD - Добавление
         - DELETE - Удаление
     """
@@ -95,7 +96,7 @@ class ConsumerActionType(graphene.Enum):
         - CHANGE - Пользователь изменил данные
         - DELETE - Удаление объекта
         - ERROR - Ошибка ввода данных
-        - TYPING - Печатет, готовиться отправить сообщение
+        - TYPING - Печатает, готовиться отправить сообщение
         - TYPING_FINISH - Закончил печатать
         - EXCEPTION - Пользователь исключен из потока уведомлений
     """
