@@ -1,14 +1,14 @@
 """Модуль со вспомогательными функциями для получения отношений между моделями."""
 
 from functools import reduce
-from typing import Type, Iterable, Protocol, Union
+from typing import Iterable, Protocol
 
 from django.db import models
 
 __all__ = ('get_children', 'get_parents',)
 
 
-def get_children(model: Type[models.Model], primary_keys: Iterable) -> list:
+def get_children(model: type[models.Model], primary_keys: Iterable) -> list:
     """Получение идентификаторов дочерних элементов, включая себя.
 
     :param model: модель
@@ -29,7 +29,7 @@ class _WithParent(Protocol):
     parent: models.Model
 
 
-def get_parents(obj: Union[models.Model, _WithParent]) -> list:
+def get_parents(obj: models.Model | _WithParent) -> list:
     """Получение идентификаторов родительских элементов, включая себя.
 
     :param obj: запись модели

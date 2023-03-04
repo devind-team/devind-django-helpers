@@ -1,6 +1,6 @@
 """Модуль с базовыми разрешениями"""
 from functools import partial
-from typing import Type, Optional, Callable, Any
+from typing import Callable, Any
 
 import graphene
 from django.db import models
@@ -45,7 +45,7 @@ class BasePermission:
 class ModelPermission(type):
     """Пропускает пользователей с разрешением на действие с моделью"""
 
-    def __new__(mcs, perm: str) -> Type[BasePermission]:
+    def __new__(mcs, perm: str) -> type[BasePermission]:
         """Создание класса разрешения.
 
         :param perm: строка разрешения на действие с моделью. Например, core.add_user
@@ -70,10 +70,11 @@ class PermissionsType(type):
     """Метакласс для создания типа разрешений на действия с объектом модели"""
 
     def __new__(
-            mcs,
-            model: Type[models.Model],
-            can_change: Optional[Type[BasePermission]] = None,
-            can_delete: Optional[Type[BasePermission]] = None):
+        mcs,
+        model: type[models.Model],
+        can_change: type[BasePermission] | None = None,
+        can_delete: type[BasePermission] | None = None,
+    ):
         """Создание типа разрешений на действия с объектом модели.
 
         :param model: модель
@@ -105,7 +106,7 @@ class PermissionsType(type):
 class PermissionsWrapperType(type):
     """Метакласс для создания обертки типа разрешений на действия с объектом модели"""
 
-    def __new__(mcs, permissions_type: Type[graphene.ObjectType]) -> Type[graphene.ObjectType]:
+    def __new__(mcs, permissions_type: type[graphene.ObjectType]) -> type[graphene.ObjectType]:
         """Создание обертки типа разрешений на действия с объектом модели.
 
         :param permissions_type: тип разрешений на действия с объектом модели

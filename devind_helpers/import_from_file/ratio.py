@@ -1,7 +1,5 @@
 """Модуль отображения полей."""
 
-from typing import Type
-
 from django.db import models
 
 
@@ -10,7 +8,7 @@ class Ratio:
 
     Ищем запись с get(email=value) -> user_id."""
 
-    def __init__(self, mapping: dict[str, Type[models.Model]]):
+    def __init__(self, mapping: dict[str, type[models.Model]]):
         """Конструктор отображения полей.
 
         :param mapping: словарь отображения

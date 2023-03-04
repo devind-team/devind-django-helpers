@@ -1,5 +1,5 @@
 """Вспомогательные мутации."""
-from typing import Any, Coroutine, Union
+from typing import Any, Coroutine
 
 import graphene
 from django.core.exceptions import ValidationError
@@ -27,7 +27,7 @@ class BaseMutation(relay.ClientIDMutation):
             self.errors = []
 
     @classmethod
-    def mutate(cls, root: Any, info: ResolveInfo, input: dict) -> Union[Coroutine, Promise]:
+    def mutate(cls, root: Any, info: ResolveInfo, input: dict) -> Coroutine | Promise:
         """Переопределение базового метода для обработки ошибок."""
         def on_resolve(payload):
             try:

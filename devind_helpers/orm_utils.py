@@ -1,6 +1,6 @@
 """Модуль со вспомогательными функциями для работы с Django ORM."""
 
-from typing import Type, Union, Optional, Protocol
+from typing import Protocol
 
 from django.db.models import Model, Manager, QuerySet
 
@@ -9,7 +9,7 @@ from devind_helpers.exceptions import NotFound
 __all__ = ('get_object_or_404', 'get_object_or_none',)
 
 
-def get_object_or_404(klass: Union[Type[Model], Manager, QuerySet], *args, **kwargs) -> Model:
+def get_object_or_404(klass: type[Model] | Manager | QuerySet, *args, **kwargs) -> Model:
     """Получение объекта модели или ошибки 404, если объект не найден.
 
     :param klass: Model, Manager или QuerySet
@@ -30,7 +30,7 @@ def get_object_or_404(klass: Union[Type[Model], Manager, QuerySet], *args, **kwa
         raise NotFound()
 
 
-def get_object_or_none(klass: Union[Type[Model], Manager, QuerySet], *args, **kwargs) -> Optional[Model]:
+def get_object_or_none(klass: type[Model] | Manager | QuerySet, *args, **kwargs) -> Model | None:
     """Получение объекта модели или значения None, если объект не найден.
 
     :param klass: Model, Manager или QuerySet
@@ -57,7 +57,7 @@ class _WithDefaultManager(Protocol):
     _default_manager: Manager
 
 
-def _get_queryset(klass: Union[_WithDefaultManager, Manager]) -> Union[QuerySet, Manager]:
+def _get_queryset(klass: _WithDefaultManager | Manager) -> QuerySet | Manager:
     """Получение QuerySet или Manager.
 
     :param klass: объект c полем _default_manager или Manager

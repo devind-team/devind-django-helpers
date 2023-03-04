@@ -1,6 +1,6 @@
 """Модуль базового считывателя."""
 from abc import ABC, abstractmethod
-from typing import Union, Iterable
+from typing import Iterable
 
 from flatten_dict.flatten_dict import unflatten
 
@@ -22,6 +22,6 @@ class BaseReader(ABC):
         ...
 
     @staticmethod
-    def tree_transform(row: dict[str, Union[str, dict]]) -> dict:
+    def tree_transform(row: dict[str, str | dict]) -> dict:
         """Преобразование элементов."""
         return unflatten(row, splitter='dot')

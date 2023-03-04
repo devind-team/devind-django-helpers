@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, Protocol, Any, Optional, Iterable, Callable, cast
+from typing import Protocol, Any, Iterable, Callable, cast
 
 import graphene
 from django.db import models
@@ -42,16 +42,17 @@ class DeleteMutation(type):
     """Метакласс для создания мутации удаления."""
 
     def __new__(
-            mcs,
-            model: Type[models.Model],
-            permissions: Optional[Iterable[Type[BasePermission]]] = None,
-            is_global_id: bool = False,
-            is_multiple: bool = False,
-            key: Optional[str] = None,
-            doc: Optional[str] = None,
-            description: Optional[str] = None,
-            check_permissions: Optional[CheckPermissions] = None,
-            additional_actions: Optional[AdditionalActions] = None) -> Type[BaseMutation]:
+        mcs,
+        model: type[models.Model],
+        permissions: Iterable[type[BasePermission]] | None = None,
+        is_global_id: bool = False,
+        is_multiple: bool = False,
+        key: str | None = None,
+        doc: str | None = None,
+        description: str | None = None,
+        check_permissions: CheckPermissions | None = None,
+        additional_actions: AdditionalActions | None = None
+    ) -> type[BaseMutation]:
         """Создание мутации удаления.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -73,7 +74,7 @@ class DeleteMutation(type):
         mutate_function_factory = mcs._create_multiple_mutate_and_get_payload \
             if is_multiple \
             else mcs._create_single_mutate_and_get_payload
-        mutation_class_container.mutation_class = cast(Type[BaseMutation], type(class_name, (BaseMutation,), {
+        mutation_class_container.mutation_class = cast(type[BaseMutation], type(class_name, (BaseMutation,), {
             '__doc__': mcs._get_doc(model, doc, is_multiple),
             'Input': mcs._create_input_class(model, is_multiple, computed_key, description),
             'mutate_and_get_payload': mutate_function_factory(
@@ -89,7 +90,7 @@ class DeleteMutation(type):
         return mutation_class_container.mutation_class
 
     @staticmethod
-    def _get_key(model: Type[models.Model], key: Optional[str], is_multiple: bool) -> str:
+    def _get_key(model: type[models.Model], key: str | None, is_multiple: bool) -> str:
         """Получение ключа поля идентификатора.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -104,7 +105,7 @@ class DeleteMutation(type):
         return f'{underscore_name}_ids' if is_multiple else f'{underscore_name}_id'
 
     @staticmethod
-    def _get_doc(model: Type[models.Model], doc: Optional[str], is_multiple: bool) -> str:
+    def _get_doc(model: type[models.Model], doc: str | None, is_multiple: bool) -> str:
         """Получение документирования класса мутации.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -121,8 +122,8 @@ class DeleteMutation(type):
 
     @staticmethod
     def _get_permissions(
-            model: Type[models.Model],
-            permissions: Optional[Iterable[Type[BasePermission]]]) -> Iterable[Type[BasePermission]]:
+            model: type[models.Model],
+            permissions: Iterable[type[BasePermission]] | None) -> Iterable[type[BasePermission]]:
         """Получение классов разрешений.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -136,10 +137,11 @@ class DeleteMutation(type):
 
     @staticmethod
     def _create_input_class(
-            model: Type[models.Model],
-            is_multiple: bool,
-            key: str,
-            description: Optional[str]) -> type:
+        model: type[models.Model],
+        is_multiple: bool,
+        key: str,
+        description: str | None
+    ) -> type:
         """Создание класса Input.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -169,13 +171,14 @@ class DeleteMutation(type):
 
     @staticmethod
     def _create_single_mutate_and_get_payload(
-            model: Type[models.Model],
-            key: str,
-            is_global_id: bool,
-            permissions: Iterable[Type[BasePermission]],
-            check_permissions: Optional[CheckPermissions],
-            additional_actions: Optional[AdditionalActions],
-            mutation_class_container: '_MutationClassContainer') -> Callable:
+        model: type[models.Model],
+        key: str,
+        is_global_id: bool,
+        permissions: Iterable[type[BasePermission]],
+        check_permissions: CheckPermissions | None,
+        additional_actions: AdditionalActions | None,
+        mutation_class_container: '_MutationClassContainer'
+    ) -> Callable:
         """Создание метода для удаления одной записи.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -205,13 +208,14 @@ class DeleteMutation(type):
 
     @staticmethod
     def _create_multiple_mutate_and_get_payload(
-            model: Type[models.Model],
-            key: str,
-            is_global_id: bool,
-            permissions: Iterable[Type[BasePermission]],
-            check_permissions: Optional[CheckPermissions],
-            additional_actions: Optional[AdditionalActions],
-            mutation_class_container: '_MutationClassContainer') -> Callable:
+        model: type[models.Model],
+        key: str,
+        is_global_id: bool,
+        permissions: Iterable[type[BasePermission]],
+        check_permissions: CheckPermissions | None,
+        additional_actions: AdditionalActions | None,
+        mutation_class_container: '_MutationClassContainer'
+    ) -> Callable:
         """Создание метода для удаления нескольких записей.
 
         :param model: модель, в которой необходимо осуществить удаление
@@ -252,4 +256,4 @@ class _MutationClassContainer:
     Служит для передачи ссылки по ссылке и построения замыкания.
     """
 
-    mutation_class: Optional[Type[BaseMutation]] = None
+    mutation_class: type[BaseMutation] | None = None

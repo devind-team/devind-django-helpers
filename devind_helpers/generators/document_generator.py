@@ -4,7 +4,7 @@ import zipfile
 from datetime import datetime
 from os import makedirs, remove
 from os.path import join, relpath, exists
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from django.conf import settings
 from django.template import Template, Context
@@ -47,7 +47,7 @@ class DocumentGenerator:
         self.context = context
         self.template_xml = template_xml
         self.template_docx = template_docx
-        self.docx_document: Optional[DocumentData] = None
+        self.docx_document: DocumentData | None = None
 
     def get_document_name(self) -> str:
         """Получение названия документа.

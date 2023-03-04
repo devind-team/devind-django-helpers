@@ -1,7 +1,7 @@
 """Модуль считывателя из формата xlsx."""
 
 import datetime
-from typing import Optional, Iterable
+from typing import Iterable
 
 import openpyxl
 
@@ -11,7 +11,7 @@ from .base_reader import BaseReader
 class ExcelReader(BaseReader):
     """Считыватель из формата xlsx."""
 
-    def __init__(self, path: str, sheet_name: Optional[str] = None):
+    def __init__(self, path: str, sheet_name: str | None = None):
         """Конструктор считывателя из формата xlsx.
 
         :param path: путь к файлу

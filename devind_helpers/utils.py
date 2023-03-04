@@ -4,12 +4,11 @@ import re
 from argparse import ArgumentTypeError
 from random import choice
 from string import ascii_letters
-from typing import Optional, Tuple, Union
 
 from graphql_relay import from_global_id
 
 
-def gid2int(gid: Union[str, int]) -> Optional[int]:
+def gid2int(gid: str | int) -> int | None:
     try:
         return int(gid)
     except ValueError:
@@ -19,7 +18,7 @@ def gid2int(gid: Union[str, int]) -> Optional[int]:
             return None
 
 
-def from_gid_or_none(global_id: Optional[str]) -> Tuple[Optional[str], Optional[int]]:
+def from_gid_or_none(global_id: str | None) -> tuple[str | None, int | None]:
     """Возвращает None в случае ошибки парсинга."""
     if not global_id:
         return None, None
@@ -46,7 +45,7 @@ def convert_str_to_bool(value: str) -> bool:
         raise ArgumentTypeError('Ожидался флаг (true/false)')
 
 
-def convert_str_to_int(value: Optional[Union[str, bytes]]) -> Optional[int]:
+def convert_str_to_int(value: str | bytes | None) -> int | None:
     """Преобразование строки в целое число."""
     if value is None:
         return None

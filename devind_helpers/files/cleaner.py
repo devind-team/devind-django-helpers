@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from functools import reduce
 from os import path, remove
-from typing import cast, Type, Callable, Iterable, Optional
+from typing import cast, Callable, Iterable
 
 from django.apps import apps, AppConfig
 from django.conf import settings
@@ -17,7 +17,7 @@ class DeleteModelFilesInfo:
     """Информация о файлах модели для удаления"""
 
     app: AppConfig      # Приложение
-    model: Type[Model]  # Модель
+    model: type[Model]  # Модель
     field: Field        # Поле модели
     delete_count: int   # Количество удаляемых файлов
 
@@ -34,7 +34,7 @@ class DeletedFileInfo:
 Callback = Callable[[DeletedFileInfo], None]
 
 
-def clear_model_field_files(model: Type[Model], field_name: str, callback: Optional[Callback] = None) -> None:
+def clear_model_field_files(model: type[Model], field_name: str, callback: Callback | None = None) -> None:
     """Удаление лишних файлов поля модели.
 
     :param model: модель
@@ -49,7 +49,7 @@ def clear_model_field_files(model: Type[Model], field_name: str, callback: Optio
     _clear_model_field_files(model._meta.app_config, model, file_fields, field, callback)
 
 
-def clear_models_files(models: Iterable[Type[Model]], callback: Optional[Callback] = None) -> None:
+def clear_models_files(models: Iterable[type[Model]], callback: Callback | None = None) -> None:
     """Удаление лишних файлов моделей.
     
     :param models: модели
@@ -60,7 +60,7 @@ def clear_models_files(models: Iterable[Type[Model]], callback: Optional[Callbac
         _clear_model_files(model._meta.app_config, model, callback)
 
 
-def clear_apps_files(app_labels: Iterable[str], callback: Optional[Callback] = None) -> None:
+def clear_apps_files(app_labels: Iterable[str], callback: Callback | None = None) -> None:
     """Удаление лишних файлов приложений.
 
     :param app_labels: названия приложений, в которых необходимо удалить файлы
@@ -69,11 +69,11 @@ def clear_apps_files(app_labels: Iterable[str], callback: Optional[Callback] = N
 
     for app_name in app_labels:
         app: AppConfig = apps.get_app_config(app_name)
-        for model in cast(Iterable[Type[Model]], app.get_models()):
+        for model in cast(Iterable[type[Model]], app.get_models()):
             _clear_model_files(app, model, callback)
 
 
-def _clear_model_files(app: AppConfig, model: Type[Model], callback: Optional[Callback] = None) -> None:
+def _clear_model_files(app: AppConfig, model: type[Model], callback: Callback | None = None) -> None:
     """Удаление лишних файлов модели.
 
     :param app: приложение
@@ -87,11 +87,12 @@ def _clear_model_files(app: AppConfig, model: Type[Model], callback: Optional[Ca
 
 
 def _clear_model_field_files(
-        app: AppConfig,
-        model: Type[Model],
-        file_fields: list[FileField],
-        file_field: FileField,
-        callback: Optional[Callback] = None) -> None:
+    app: AppConfig,
+    model: type[Model],
+    file_fields: list[FileField],
+    file_field: FileField,
+    callback: Callback | None = None,
+) -> None:
     """Удаление лишних файлов поля модели.
 
     :param app: приложение

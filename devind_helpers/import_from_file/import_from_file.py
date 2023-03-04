@@ -1,6 +1,6 @@
 """Модуль импорта данных из файла."""
 from os.path import splitext
-from typing import TypeVar, Generic, Optional, Type, Protocol, Iterable, Union, Any
+from typing import TypeVar, Generic, Protocol, Iterable, Any
 
 from django.db import models, transaction
 from flatten_dict.flatten_dict import flatten
@@ -13,7 +13,7 @@ from ..validator import Validator
 
 Errors = dict[str, dict[str, str]]
 ItemError = tuple[int, Errors]
-Relative = tuple[Type[Validator], Type[models.Model]]
+Relative = tuple[type[Validator], type[models.Model]]
 
 
 Model = TypeVar('Model', bound=models.Model)
@@ -21,11 +21,12 @@ Model = TypeVar('Model', bound=models.Model)
 
 class BeforeCreate(Protocol):
     def __call__(
-            self,
-            mdl: Type[Model],
-            data: dict,
-            separated_data: Optional[dict],
-            index: int) -> Optional[tuple[dict, dict]]:
+        self,
+        mdl: type[Model],
+        data: dict,
+        separated_data: dict | None,
+        index: int
+    ) -> tuple[dict, dict] | None:
         """Хук, вызываемый перед созданием объекта.
 
         :param mdl: модель
@@ -38,7 +39,7 @@ class BeforeCreate(Protocol):
 
 
 class Created(Protocol):
-    def __call__(self, obj: Model, data: dict, separated_data: Optional[dict], index: int) -> Any:
+    def __call__(self, obj: Model, data: dict, separated_data: dict | None, index: int) -> Any:
         """Хук, вызываемый после создания объекта.
 
         :param obj: созданный объект
@@ -60,14 +61,15 @@ class ImportFromFile(Generic[Model]):
     }
 
     def __init__(
-            self,
-            model: Type[Model],
-            path: str,
-            validator: Optional[Type[Validator]] = None,
-            relative: Optional[dict[str, Relative]] = None,
-            introduction: Optional[dict] = None,
-            ratio: Ratio = None,
-            required_keys: Optional[list[str]] = None):
+        self,
+        model: type[Model],
+        path: str,
+        validator: type[Validator] | None = None,
+        relative: dict[str, Relative] | None = None,
+        introduction: dict | None = None,
+        ratio: Ratio = None,
+        required_keys: list[str] | None = None
+    ):
         """Конструктор импорта данных из файла.
 
         :param model: модель
@@ -85,9 +87,9 @@ class ImportFromFile(Generic[Model]):
         self.introduction = introduction
         self.ratio = ratio
         self.required_keys = required_keys
-        self.separated_keys: Optional[list[str]] = None
-        self.separated_ratio: Optional[Ratio] = None
-        self.separated_validator: Optional[Type[Validator]] = None
+        self.separated_keys: list[str] | None = None
+        self.separated_ratio: Ratio | None = None
+        self.separated_validator: type[Validator] | None = None
 
     @property
     def items(self) -> list[dict]:
@@ -100,7 +102,7 @@ class ImportFromFile(Generic[Model]):
         return self.initial_items
 
     @property
-    def separated_items(self) -> Optional[list[dict]]:
+    def separated_items(self) -> list[dict] | None:
         """Отделенные элементы."""
         if self.separated_keys:
             result: list[dict] = []
@@ -128,11 +130,13 @@ class ImportFromFile(Generic[Model]):
             keys.extend(k for k in keys_set if '|' in k and k.endswith(key))
         return keys
 
-    def separate(self,
-                 keys: Iterable[str],
-                 ratio: Optional[Ratio] = None,
-                 validator: Optional[Type[Validator]] = None) -> None:
-        """Отоделение некоторых полей для специфической записи в базу данных.
+    def separate(
+        self,
+        keys: Iterable[str],
+        ratio: Ratio | None = None,
+        validator: type[Validator] | None = None
+    ) -> None:
+        """Отделение некоторых полей для специфической записи в базу данных.
 
         :param keys: ключи, которые необходимо отделить
         :param ratio: отображение полей
@@ -143,7 +147,7 @@ class ImportFromFile(Generic[Model]):
         self.separated_ratio = ratio
         self.separated_validator = validator
 
-    def validate(self) -> tuple[bool, Optional[list[ItemError]]]:
+    def validate(self) -> tuple[bool, list[ItemError] | None]:
         """Валидация элементов.
 
         :return: (успех валидации, список ошибок валидации элементов)
@@ -173,9 +177,10 @@ class ImportFromFile(Generic[Model]):
 
     @transaction.atomic
     def run(
-            self,
-            before_create: Optional[BeforeCreate] = None,
-            created: Optional[Created] = None) -> list[Union[Model, Any]]:
+        self,
+        before_create: BeforeCreate | None = None,
+        created: Created | None = None
+    ) -> list[Model | Any]:
         """Запуск процедуры заполнения базы данных.
 
         :param before_create: хук, вызываемый перед созданием объекта
@@ -185,14 +190,19 @@ class ImportFromFile(Generic[Model]):
 
         from .exceptions import HookItemException, ItemsException
 
-        result: list[Union[Model, Any]] = []
+        result: list[Model | Any] = []
         errors: list[ItemError] = []
         for i, item in enumerate(self.items):
             try:
                 data = self._modify_item(item)
                 separated_data = self._modify_separated_item(self.separated_items[i]) if self.separated_items else None
                 if before_create is not None:
-                    before_create_result = before_create(mdl=self.model, data=data, separated_data=separated_data, index=i)
+                    before_create_result = before_create(
+                        mdl=self.model,
+                        data=data,
+                        separated_data=separated_data,
+                        index=i
+                    )
                     if before_create_result is not None:
                         data, separated_data = before_create_result
                 obj = self.model.objects.create(**data)
@@ -239,7 +249,7 @@ class ImportFromFile(Generic[Model]):
             return data
         return self.separated_ratio.map(data)
 
-    def _validate_related(self, related: dict, parent: str = '') -> tuple[bool, Optional[Errors]]:
+    def _validate_related(self, related: dict, parent: str = '') -> tuple[bool, Errors | None]:
         """Валидация связанного элемента.
 
         :param related: связанного элемент

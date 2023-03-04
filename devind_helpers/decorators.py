@@ -1,7 +1,7 @@
 """Модуль с декораторами."""
 
 from functools import wraps
-from typing import Type, Callable, Iterable, Union, Optional, Any
+from typing import Callable, Iterable, Any
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from graphql import ResolveInfo
@@ -22,7 +22,7 @@ __all__ = (
 )
 
 
-def permission_classes(permissions: Iterable[Type[BasePermission]]) -> Callable[[Callable], Callable]:
+def permission_classes(permissions: Iterable[type[BasePermission]]) -> Callable[[Callable], Callable]:
     """Применение классов разрешений к мутации.
 
     :param permissions: классы разрешений
@@ -43,7 +43,7 @@ def permission_classes(permissions: Iterable[Type[BasePermission]]) -> Callable[
     return wrapped_decorator
 
 
-def resolve_classes(resolve_models: Optional[Iterable[Type[ResolveModel]]]) -> Callable[[Callable], Callable]:
+def resolve_classes(resolve_models: Iterable[type[ResolveModel]] | None) -> Callable[[Callable], Callable]:
     """Применение классов разрешения данных к мутации.
 
     :param resolve_models: классы, разрешающие данные
@@ -67,9 +67,10 @@ class ValidationError(Exception):
 
 
 def validation_classes(
-        validators: Iterable[Union[Type[Validator], tuple[Type[Validator], Callable[[str], bool]]]],
-        additional_data: Optional[dict] = None,
-        deferred: bool = False) -> Callable[[Callable], Callable]:
+    validators: Iterable[type[Validator] | tuple[type[Validator] | Callable[[str], bool]]],
+    additional_data: dict | None = None,
+    deferred: bool = False
+) -> Callable[[Callable], Callable]:
     """Применение классов валидаторов к мутации.
 
     :param validators: классы валидаторов опционально с функциями,
@@ -83,7 +84,7 @@ def validation_classes(
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(cls, root, info: ResolveInfo, *args, **kwargs):
-            def get_errors(validation_data: Optional[dict] = None) -> list[ErrorFieldType]:
+            def get_errors(validation_data: dict | None = None) -> list[ErrorFieldType]:
                 data: dict = validation_data or _validation_filter(kwargs)
                 errors: list[ErrorFieldType] = []
                 for validator in validators:
@@ -97,7 +98,7 @@ def validation_classes(
             ad = additional_data or {}
             try:
                 if deferred:
-                    def validate(validation_data: Optional[dict] = None) -> None:
+                    def validate(validation_data: dict | None = None) -> None:
                         ve = get_errors(validation_data)
                         if len(ve):
                             raise ValidationError(ve)
@@ -123,7 +124,7 @@ def register_users(key: str, delete: bool = False) -> Callable[[Callable], Calla
         @wraps(func)
         def inner(*args, **kwargs):
             info: ResolveInfo = _get_resolve_info(*args)
-            user_id: Optional[int] = info.context.user.id if hasattr(info.context, 'user') else None
+            user_id: int | None = info.context.user.id if hasattr(info.context, 'user') else None
             if redis and user_id:
                 value: int = convert_str_to_int(redis.hget(key, user_id)) or 0
                 # Если значение <= 0 и очищаем, то мы не можем отнять -1 -> удаляем
@@ -136,7 +137,7 @@ def register_users(key: str, delete: bool = False) -> Callable[[Callable], Calla
     return wrapped_decorator
 
 
-def _check_permissions(permissions: Iterable[Type[BasePermission]], context: Any) -> bool:
+def _check_permissions(permissions: Iterable[type[BasePermission]], context: Any) -> bool:
     """Проверка разрешений.
 
     :param permissions: классы разрешений
@@ -150,7 +151,7 @@ def _check_permissions(permissions: Iterable[Type[BasePermission]], context: Any
     return True
 
 
-def _check_object_permissions(permissions: Iterable[Type[BasePermission]], context: Any, obj: Any) -> bool:
+def _check_object_permissions(permissions: Iterable[type[BasePermission]], context: Any, obj: Any) -> bool:
     """Проверка разрешений для заданного объекта.
 
     :param permissions: классы разрешений

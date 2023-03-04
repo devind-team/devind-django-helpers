@@ -1,7 +1,7 @@
 """Модуль для синхронизации между файлами и их электронными подписями."""
 from dataclasses import dataclass
 from os import path
-from typing import Type, Callable, Iterable, Optional
+from typing import Callable, Iterable
 
 from django.db.models import Model
 from django.db.models.fields.files import FieldFile
@@ -13,7 +13,7 @@ from .utils import get_existing_paths
 class SynchronizeModelFilesInfo:
     """Информация о файлах модели для синхронизации."""
 
-    model: Type[Model]    # Модель
+    model: type[Model]    # Модель
     file_field_name: str  # Название поля файла
     sign_field_name: str  # Название поля электронной подписи
 
@@ -30,7 +30,7 @@ class SynchronizedFilesInfo:
 Callback = Callable[[SynchronizedFilesInfo], None]
 
 
-def synchronize_sign(files_info: Iterable[SynchronizeModelFilesInfo], callback: Optional[Callback] = None) -> None:
+def synchronize_sign(files_info: Iterable[SynchronizeModelFilesInfo], callback: Callback | None = None) -> None:
     """Синхронизация между файлами и их электронными подписями.
 
     :param files_info: информация о файлах моделей
