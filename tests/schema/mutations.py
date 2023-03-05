@@ -1,4 +1,5 @@
 """Тесты вспомогательных мутаций."""
+
 from collections import OrderedDict
 from typing import Any
 
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from graphql import ResolveInfo
 
-from devind_helpers.schema import BaseMutation
+from devind_helpers.schema import BaseMutation  # noqa
 
 
 class TestMutation(BaseMutation):
@@ -19,12 +20,14 @@ class TestMutation(BaseMutation):
     digit = graphene.Int()
 
     @staticmethod
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, i: str):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, i: str) -> 'TestMutation':  # noqa
         if i.isdigit():
             return TestMutation(digit=int(i))
-        raise ValidationError(message={
-            'i': ['Ожидалась строка с числом']
-        })
+        raise ValidationError(
+            message={
+                'i': ['Ожидалась строка с числом'],
+            },
+        )
 
 
 class TestMutations(graphene.ObjectType):
@@ -47,7 +50,7 @@ class BaseMutationTestCase(TestCase):
         expected_data['testMutation'] = {
             'digit': 5,
             'success': True,
-            'errors': []
+            'errors': [],
         }
         self.assertEqual(expected_data, result.data)
 
@@ -60,13 +63,13 @@ class BaseMutationTestCase(TestCase):
             'success': False,
             'errors': [{
                 'field': 'i',
-                'messages': ['Ожидалась строка с числом']
-            }]
+                'messages': ['Ожидалась строка с числом'],
+            }],
         }
         self.assertEqual(expected_data, result.data)
 
     @staticmethod
-    def _create_test_mutation_query(i: str):
+    def _create_test_mutation_query(i: str) -> str:
         """Создание запроса для тестовой мутации."""
         return f"""
             mutation {{

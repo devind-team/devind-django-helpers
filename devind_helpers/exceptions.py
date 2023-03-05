@@ -1,5 +1,7 @@
 """Модуль с исключениями."""
 
+from typing import Any
+
 from graphql import GraphQLError as BaseGraphQLError
 
 
@@ -9,13 +11,12 @@ class GraphQLError(BaseGraphQLError):
     status: int = 404
     message: str = 'Произошла ошибка'
 
-    def __init__(self, message=None, status=None, *args, **kwargs):
+    def __init__(self, message: str | None = None, status: int | None = None, *args: Any, **kwargs: Any) -> None:
         """Конструктор ошибки GraphQL.
 
         :param message: сообщение
         :param status: код состояния
         """
-
         if message is None:
             message = self.message
         if status is None:
@@ -24,14 +25,13 @@ class GraphQLError(BaseGraphQLError):
 
 
 class PermissionDenied(GraphQLError):
-    """Ошибка отсуствия прав."""
+    """Ошибка отсутствия прав."""
 
     status: int = '403'
     message: str = 'У Вас недостаточно прав для совершения данного действия'
-    
-    def __init__(self, *args, **kwargs):
-        """Конструктор ошибки отсутствия прав."""
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Конструктор ошибки отсутствия прав."""
         super(PermissionDenied, self).__init__(*args, **kwargs)
 
 

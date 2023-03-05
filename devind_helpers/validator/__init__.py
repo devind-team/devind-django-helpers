@@ -1,4 +1,5 @@
-from .validators import Validator, BaseRule
+"""Пакет валидатора."""
 
+from .validators import BaseRule, Validator
 
-__all__ = ('Validator', 'BaseRule',)
+__all__ = ('Validator', 'BaseRule')

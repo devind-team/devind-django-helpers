@@ -6,23 +6,22 @@ from django.db import models
 class Ratio:
     """Отображения полей типа email|user_id.
 
-    Ищем запись с get(email=value) -> user_id."""
+    Ищем запись с get(email=value) -> user_id.
+    """
 
-    def __init__(self, mapping: dict[str, type[models.Model]]):
+    def __init__(self, mapping: dict[str, type[models.Model]]) -> None:
         """Конструктор отображения полей.
 
         :param mapping: словарь отображения
         """
-
         self.mapping = mapping
 
-    def map(self, data: dict) -> dict:
+    def map(self, data: dict) -> dict: # noqa
         """Отображение полей.
 
         :param data: данные для отображения
         :return: результат отображения
         """
-
         result: dict = {}
         for k, v in data.items():
             if k in self.mapping:

@@ -1,1 +1,3 @@
-from .document_generator import get_tmp_document_name, DocumentGeneratorException, DocumentData, DocumentGenerator
+"""Пакет для генераторов."""
+
+from .document_generator import DocumentData, DocumentGenerator, DocumentGeneratorError, get_tmp_document_name

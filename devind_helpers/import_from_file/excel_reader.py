@@ -1,7 +1,7 @@
 """Модуль считывателя из формата xlsx."""
 
-import datetime
-from typing import Iterable
+from datetime import date, datetime
+from typing import Any, Iterable
 
 import openpyxl
 
@@ -11,7 +11,7 @@ from .base_reader import BaseReader
 class ExcelReader(BaseReader):
     """Считыватель из формата xlsx."""
 
-    def __init__(self, path: str, sheet_name: str | None = None):
+    def __init__(self, path: str, sheet_name: str | None = None) -> None:
         """Конструктор считывателя из формата xlsx.
 
         :param path: путь к файлу
@@ -26,17 +26,19 @@ class ExcelReader(BaseReader):
     def items(self) -> Iterable:
         """Перечисляем элементы с двух. Первая строка заголовок."""
         for i in range(2, self.sheet.max_row + 1):
-            yield self.tree_transform({
-                self._headers[j]: self.get_value(self.sheet.cell(i, j + 1).value)
-                for j in range(self.sheet.max_column)
-                if self._headers[j] is not None
-            })
+            yield self.tree_transform(
+                {
+                    self._headers[j]: self.get_value(self.sheet.cell(i, j + 1).value)
+                    for j in range(self.sheet.max_column)
+                    if self._headers[j] is not None
+                },
+            )
 
     @staticmethod
-    def get_value(value):
+    def get_value(value: str | datetime | date | Any) -> str | Any:
         """Получение правильного значения ячейки."""
         if type(value) == str:
             return value.strip()
-        elif type(value) == datetime.datetime or type(value) == datetime.date:
+        elif type(value) == datetime or type(value) == datetime.date:
             return value.strftime('%Y-%m-%d')
         return value

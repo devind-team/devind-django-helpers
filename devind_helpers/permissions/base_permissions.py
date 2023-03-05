@@ -1,6 +1,7 @@
-"""Модуль с базовыми разрешениями"""
+"""Модуль с базовыми разрешениями."""
+
 from functools import partial
-from typing import Callable, Any
+from typing import Any, Callable
 
 import graphene
 from django.db import models
@@ -8,44 +9,41 @@ from graphql import ResolveInfo
 
 
 class BasePermission:
-    """Базовый класс разрешения на действие с моделью"""
+    """Базовый класс разрешения на действие с моделью."""
 
     @staticmethod
-    def has_permission(context):
+    def has_permission(context: Any) -> bool:
         """Возвращает True если есть права, False в противном случае.
 
         :param context: контекст
         :return: если ли права
         """
-
         return True
 
     @staticmethod
-    def has_object_permission(context, obj):
+    def has_object_permission(context: Any, obj: Any) -> bool:  # noqa
         """Возвращает True если есть права, False в противном случае.
 
         :param context: контекст
         :param obj: объект для проверки
         :return: есть ли права
         """
-
         return True
 
     @classmethod
-    def reduce_context(cls, context) -> Callable[[Any], bool]:
+    def reduce_context(cls, context: Any) -> Callable[[Any], bool]:
         """Убирает зависимость функции has_object_permission от контекста.
 
         :param context: контекст
         :return: функция has_object_permission без параметра context
         """
-
         return partial(cls.has_object_permission, context)
 
 
 class ModelPermission(type):
-    """Пропускает пользователей с разрешением на действие с моделью"""
+    """Пропускает пользователей с разрешением на действие с моделью."""
 
-    def __new__(mcs, perm: str) -> type[BasePermission]:
+    def __new__(mcs, perm: str) -> type[BasePermission]:  # noqa
         """Создание класса разрешения.
 
         :param perm: строка разрешения на действие с моделью. Например, core.add_user
@@ -54,27 +52,28 @@ class ModelPermission(type):
 
         class Permission(BasePermission):
             @staticmethod
-            def has_permission(context):
+            def has_permission(context: Any) -> bool:
                 return context.user.has_perm(perm)
+
         return Permission
 
 
 class PermissionsInterface(graphene.Interface):
-    """Интерфейс разрешений на действия с объектом модели"""
+    """Интерфейс разрешений на действия с объектом модели."""
 
     can_change = graphene.Boolean(required=True, description='Есть ли права на изменение объекта модели')
     can_delete = graphene.Boolean(required=True, description='Есть ли права на удаление объекта модели')
 
 
 class PermissionsType(type):
-    """Метакласс для создания типа разрешений на действия с объектом модели"""
+    """Метакласс для создания типа разрешений на действия с объектом модели."""
 
     def __new__(
-        mcs,
+        mcs,  # noqa
         model: type[models.Model],
         can_change: type[BasePermission] | None = None,
         can_delete: type[BasePermission] | None = None,
-    ):
+    ) -> type[graphene.ObjectType]:
         """Создание типа разрешений на действия с объектом модели.
 
         :param model: модель
@@ -89,13 +88,13 @@ class PermissionsType(type):
                 interfaces = (PermissionsInterface,)
 
             @staticmethod
-            def resolve_can_change(obj: models.Model, info: ResolveInfo):
+            def resolve_can_change(obj: models.Model, info: ResolveInfo) -> bool:
                 return can_change.has_permission(info.context) and can_change.has_object_permission(info.context, obj) \
                     if can_change \
                     else True
 
             @staticmethod
-            def resolve_can_delete(obj: models.Model, info: ResolveInfo):
+            def resolve_can_delete(obj: models.Model, info: ResolveInfo) -> bool:
                 return can_delete.has_permission(info.context) and can_delete.has_object_permission(info.context, obj) \
                     if can_delete \
                     else True
@@ -104,9 +103,9 @@ class PermissionsType(type):
 
 
 class PermissionsWrapperType(type):
-    """Метакласс для создания обертки типа разрешений на действия с объектом модели"""
+    """Метакласс для создания обертки типа разрешений на действия с объектом модели."""
 
-    def __new__(mcs, permissions_type: type[graphene.ObjectType]) -> type[graphene.ObjectType]:
+    def __new__(mcs, permissions_type: type[graphene.ObjectType]) -> type[graphene.ObjectType]:  # noqa
         """Создание обертки типа разрешений на действия с объектом модели.
 
         :param permissions_type: тип разрешений на действия с объектом модели
@@ -117,14 +116,14 @@ class PermissionsWrapperType(type):
             permissions = graphene.Field(
                 permissions_type,
                 required=True,
-                description='Разрешения на действия с объектом модели'
+                description='Разрешения на действия с объектом модели',
             )
 
             class Meta:
                 abstract = True
 
             @staticmethod
-            def resolve_permissions(obj: models.Model, info: ResolveInfo):
+            def resolve_permissions(obj: models.Model, _info: ResolveInfo) -> models.Model:
                 return obj
 
         return ConstructedPermissionsWrapperType

@@ -1,6 +1,6 @@
 """Модуль распаковщика zip архивов."""
 
-from os import path, listdir, mkdir, rename, remove
+from os import listdir, mkdir, path, remove, rename
 from shutil import rmtree
 from zipfile import ZipFile
 
@@ -14,7 +14,7 @@ from .utils import random_string
 class UnpackZip:
     """Распаковщик zip архивов."""
 
-    def __init__(self, archive: InMemoryUploadedFile):
+    def __init__(self, archive: InMemoryUploadedFile) -> None:
         """Конструктор распаковщика zip архивов.
 
         :param archive: zip архив
@@ -34,23 +34,23 @@ class UnpackZip:
                     try:
                         ed_name = self._get_right_file_name(file_name)
                         rename(path.join(self.tmp_dir, file_name), path.join(self.tmp_dir, ed_name))
-                    except UnicodeEncodeError as _:
+                    except UnicodeEncodeError:
                         # Если удалось преобразовать, ничего не делаем
                         pass
-                except OSError as e:
-                    raise ValidationError({
-                        'name': [f'Слишком длинное название файла {self._get_right_file_name(file_name)}.']
-                    })
+                except OSError:
+                    raise ValidationError(
+                        {
+                            'name': [f'Слишком длинное название файла {self._get_right_file_name(file_name)}.'],
+                        },
+                    )
         remove(archive_name)
 
     def __call__(self) -> list[str]:
         """Получение имен файлов."""
-
         return [path.join(self.tmp_dir, file_name) for file_name in listdir(self.tmp_dir)]
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Удаление временной папки."""
-
         rmtree(self.tmp_dir)
 
     @classmethod
@@ -60,9 +60,8 @@ class UnpackZip:
         :param: file_name: неправильное имя файла
         :return: правильное имя файла
         """
-
         try:
             return file_name.encode('cp437').decode('cp866')
-        except UnicodeEncodeError as _:
+        except UnicodeEncodeError:
             # Если удалось преобразовать, ничего не делаем
             return file_name

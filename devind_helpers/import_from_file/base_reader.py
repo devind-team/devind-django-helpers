@@ -1,4 +1,5 @@
 """Модуль базового считывателя."""
+
 from abc import ABC, abstractmethod
 from typing import Iterable
 
@@ -8,7 +9,7 @@ from flatten_dict.flatten_dict import unflatten
 class BaseReader(ABC):
     """Базовый считыватель."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         """Конструктор базового считывателя.
 
         :param path: путь к файлу

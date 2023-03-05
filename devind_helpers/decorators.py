@@ -1,17 +1,17 @@
 """Модуль с декораторами."""
 
 from functools import wraps
-from typing import Callable, Iterable, Any
+from typing import Any, Callable, Iterable
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from graphql import ResolveInfo
 
-from devind_helpers.exceptions import PermissionDenied
-from devind_helpers.permissions import BasePermission
-from devind_helpers.redis_client import redis
-from devind_helpers.resolve_model import ResolveModel
-from devind_helpers.utils import convert_str_to_int
-from devind_helpers.validator import Validator
+from .exceptions import PermissionDenied
+from .permissions import BasePermission
+from .redis_client import redis
+from .resolve_model import ResolveModel
+from .utils import convert_str_to_int
+from .validator import Validator
 
 __all__ = (
     'permission_classes',
@@ -30,16 +30,19 @@ def permission_classes(permissions: Iterable[type[BasePermission]]) -> Callable[
 
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
-        def inner(*args, **kwargs):
-            def check_object_perms(context, obj):
+        def inner(*args: Any, **kwargs: Any) -> None:
+            def check_object_perms(context: Any, obj: Any) -> None:
                 if not _check_object_permissions(permissions, context, obj):
                     raise PermissionDenied('Ошибка доступа')
+
             info: ResolveInfo = _get_resolve_info(*args)
             if _check_permissions(permissions, info.context):
                 info.context.check_object_permissions = check_object_perms
                 return func(*args, **kwargs)
             raise PermissionDenied('Ошибка доступа')
+
         return inner
+
     return wrapped_decorator
 
 
@@ -51,25 +54,28 @@ def resolve_classes(resolve_models: Iterable[type[ResolveModel]] | None) -> Call
 
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             for resolve_model in resolve_models:
                 kwargs = resolve_model.resolve_global(kwargs)
             return func(*args, **kwargs)
+
         return inner
+
     return wrapped_decorator
 
 
 class ValidationError(Exception):
-    """Ошибка валидации"""
+    """Ошибка валидации."""
 
-    def __init__(self, errors: list):
+    def __init__(self, errors: list) -> None:
+        """Инициализатор ошибки валидации."""
         self.errors = errors
 
 
 def validation_classes(
     validators: Iterable[type[Validator] | tuple[type[Validator] | Callable[[str], bool]]],
     additional_data: dict | None = None,
-    deferred: bool = False
+    deferred: bool = False,
 ) -> Callable[[Callable], Callable]:
     """Применение классов валидаторов к мутации.
 
@@ -78,12 +84,11 @@ def validation_classes(
     :param additional_data: дополнительные данные, передаваемые в мутацию
     :param deferred: является ли применение валидации отложенным
     """
-
     from devind_helpers.schema.types import ErrorFieldType
 
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
-        def inner(cls, root, info: ResolveInfo, *args, **kwargs):
+        def inner(cls: type, root: Any, info: ResolveInfo, *args: Any, **kwargs: Any) -> type:
             def get_errors(validation_data: dict | None = None) -> list[ErrorFieldType]:
                 data: dict = validation_data or _validation_filter(kwargs)
                 errors: list[ErrorFieldType] = []
@@ -95,13 +100,15 @@ def validation_classes(
                     if not v.validate():
                         errors.extend(ErrorFieldType.from_validator(v.get_message()))
                 return errors
+
             ad = additional_data or {}
             try:
                 if deferred:
                     def validate(validation_data: dict | None = None) -> None:
-                        ve = get_errors(validation_data)
-                        if len(ve):
-                            raise ValidationError(ve)
+                        errors = get_errors(validation_data)
+                        if len(errors):
+                            raise ValidationError(errors)
+
                     info.context.validate = validate
                     return func(cls, root, info, *args, **kwargs)
                 else:
@@ -109,7 +116,9 @@ def validation_classes(
                     return cls(success=False, errors=e, *ad) if len(e) else func(cls, root, info, *args, **kwargs)
             except ValidationError as ex:
                 return cls(success=False, errors=ex.errors, *ad)
+
         return inner
+
     return wrapped_decorator
 
 
@@ -122,18 +131,20 @@ def register_users(key: str, delete: bool = False) -> Callable[[Callable], Calla
 
     def wrapped_decorator(func: Callable) -> Callable:
         @wraps(func)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             info: ResolveInfo = _get_resolve_info(*args)
             user_id: int | None = info.context.user.id if hasattr(info.context, 'user') else None
             if redis and user_id:
-                value: int = convert_str_to_int(redis.hget(key, user_id)) or 0
+                value: int = convert_str_to_int(redis.hget(key, user_id)) or 0  # noqa
                 # Если значение <= 0 и очищаем, то мы не можем отнять -1 -> удаляем
                 if value <= 0 and delete:
-                    redis.hdel(key, user_id)
+                    redis.hdel(key, user_id)  # noqa
                 else:
-                    redis.hincrby(key, user_id, -1 if delete else 1)
+                    redis.hincrby(key, user_id, -1 if delete else 1)  # noqa
             return func(*args, **kwargs)
+
         return inner
+
     return wrapped_decorator
 
 
@@ -144,11 +155,7 @@ def _check_permissions(permissions: Iterable[type[BasePermission]], context: Any
     :param context: контекст
     :return: результат проверки
     """
-
-    for permission in permissions:
-        if not permission.has_permission(context):
-            return False
-    return True
+    return all(permission.has_permission(context) for permission in permissions)
 
 
 def _check_object_permissions(permissions: Iterable[type[BasePermission]], context: Any, obj: Any) -> bool:
@@ -159,11 +166,7 @@ def _check_object_permissions(permissions: Iterable[type[BasePermission]], conte
     :param obj: заданный объект
     :return: результат проверки
     """
-
-    for permission in permissions:
-        if not permission.has_object_permission(context, obj):
-            return False
-    return True
+    return all(permission.has_object_permission(context, obj) for permission in permissions)
 
 
 def _validation_filter(kwargs: dict) -> dict:
@@ -172,16 +175,15 @@ def _validation_filter(kwargs: dict) -> dict:
     :param kwargs: словарь для валидации
     :return: словарь для валидации с исключенными значениями TemporaryUploadedFile
     """
-
     return {k: v for k, v in kwargs.items() if not isinstance(v, TemporaryUploadedFile)}
 
 
-def _get_resolve_info(*args) -> ResolveInfo:
-    """Получение ResolveInfo из аргументов, которые могут быть,
-    как аргументами метода экземпляра или класса, так и аргументами статического метода.
+def _get_resolve_info(*args: Any) -> ResolveInfo:
+    """Получение ResolveInfo из аргументов.
+
+    Аргументы могут быть, как аргументами метода экземпляра или класса, так и аргументами статического метода.
 
     :param args: аргументы метода неизвестного типа
     :return: объект ResolveInfo
     """
-
     return args[2] if len(args) >= 3 and hasattr(args[2], 'context') else args[1]

@@ -77,9 +77,11 @@ class Switch(BaseRule):
 
     def get_message(self):
         switch_str = ','.join(self._get_params())
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   SWITCH=switch_str)
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            SWITCH=switch_str,
+        )
 
     def _get_params(self):
         return self.args if self.args else []
@@ -145,8 +147,10 @@ class Cellphone(BaseRule):
     name = 'cellphone'
     regex = r'^([\+]?[0-9]{2})?1[0-9]{10}$'
     message = _('{VALUE} of {FIELD} is not a cellphone number')
-    description = _('check if the given value is a cellphone number , '
-                    'if there is a internation code it sould begin with + .')
+    description = _(
+        'check if the given value is a cellphone number , '
+        'if there is a internation code it sould begin with + .',
+    )
 
     def check_null(self):
         pass
@@ -252,10 +256,12 @@ class Date(BaseRule):
 
     def get_message(self):
         format_str = self.get_format()
-        return self.message.format(FIELD=self.field_name,
-                                   VALUE=self.field_value,
-                                   FORMAT_STR=format_str,
-                                   RULE_NAME=self.name)
+        return self.message.format(
+            FIELD=self.field_name,
+            VALUE=self.field_value,
+            FORMAT_STR=format_str,
+            RULE_NAME=self.name,
+        )
 
 
 class Datetime(BaseRule):
@@ -279,10 +285,12 @@ class Datetime(BaseRule):
 
     def get_message(self):
         format_str = self.get_format()
-        return self.message.format(FIELD=self.field_name,
-                                   VALUE=self.field_value,
-                                   FORMAT_STR=format_str,
-                                   RULE_NAME=self.name)
+        return self.message.format(
+            FIELD=self.field_name,
+            VALUE=self.field_value,
+            FORMAT_STR=format_str,
+            RULE_NAME=self.name,
+        )
 
 
 class DateBefore(BaseRule):
@@ -316,9 +324,11 @@ class DateBefore(BaseRule):
         return date
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   DATE=self.args[0])
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            DATE=self.args[0],
+        )
 
 
 class DateAfter(BaseRule):
@@ -352,9 +362,11 @@ class DateAfter(BaseRule):
         return date
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   DATE=self.args[0])
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            DATE=self.args[0],
+        )
 
 
 class DateRange(BaseRule):
@@ -386,10 +398,12 @@ class DateRange(BaseRule):
         return date
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   BEGIN=self.args[0],
-                                   END=self.args[1])
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            BEGIN=self.args[0],
+            END=self.args[1],
+        )
 
 
 class DatetimeBefore(BaseRule):
@@ -507,10 +521,12 @@ class Accepted(BaseRule):
         return flag in self.flag or flag in list(self.args)
 
     def get_message(self):
-        return self.message.format(FIELD=self.field_name,
-                                   VALUE=self.field_value,
-                                   FLAGS=self.get_flag_str(),
-                                   RULE_NAME=self.name)
+        return self.message.format(
+            FIELD=self.field_name,
+            VALUE=self.field_value,
+            FLAGS=self.get_flag_str(),
+            RULE_NAME=self.name,
+        )
 
 
 class Unique(BaseRule):
@@ -542,9 +558,11 @@ class Unique(BaseRule):
         return apps.get_model(app, name)
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value, FIELD=self.field_name,
-                                   MODEL=self.args[0],
-                                   MODEL_FIELD=self.args[1])
+        return self.message.format(
+            VALUE=self.field_value, FIELD=self.field_name,
+            MODEL=self.args[0],
+            MODEL_FIELD=self.args[1],
+        )
 
 
 class AlphaDash(BaseRule):
@@ -616,9 +634,11 @@ class DateBeforeEqual(BaseRule):
         return date
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   DATE=self.args[0])
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            DATE=self.args[0],
+        )
 
 
 class DateAfterEqual(BaseRule):
@@ -652,9 +672,11 @@ class DateAfterEqual(BaseRule):
         return date
 
     def get_message(self):
-        return self.message.format(VALUE=self.field_value,
-                                   FIELD=self.field_name,
-                                   DATE=self.args[0])
+        return self.message.format(
+            VALUE=self.field_value,
+            FIELD=self.field_name,
+            DATE=self.args[0],
+        )
 
 
 class DateTimeBeforeEqual(BaseRule):
@@ -894,11 +916,13 @@ class Max(SizeMixin, BaseRule):
 class Size(SizeMixin, BaseRule):
     name = 'size'
     message = _('size of {FIELD} is not equals to {SIZE}')
-    description = _('The field under validation must have a size matching the given value. '
-                    'For string data, value corresponds to the number of characters. '
-                    'For numeric data, value corresponds to a given integer value. '
-                    'For an array, size corresponds to the count of the array. '
-                    'For files, size corresponds to the file size in kilobytes.')
+    description = _(
+        'The field under validation must have a size matching the given value. '
+        'For string data, value corresponds to the number of characters. '
+        'For numeric data, value corresponds to a given integer value. '
+        'For an array, size corresponds to the count of the array. '
+        'For files, size corresponds to the file size in kilobytes.',
+    )
 
     def _check_size(self, _size, size):
         self.status = _size == size
@@ -907,8 +931,10 @@ class Size(SizeMixin, BaseRule):
 class Username(BaseRule):
     name = 'username'
     message = _('the input {VALUE} is not a proper username.')
-    description = _('this rule will check the normal username, the initial of username must be a alphabet character and'
-                    'it could conbimes with digits, dot, underscore and dash.')
+    description = _(
+        'this rule will check the normal username, the initial of username must be a alphabet character and'
+        'it could conbimes with digits, dot, underscore and dash.',
+    )
 
     regex = r'^[a-z]{1}[a-z0-9\.\-_]*$'
 
@@ -922,14 +948,16 @@ class Username(BaseRule):
 class Password(BaseRule):
     name = 'password'
     message = _('the input is not a proper password.')
-    description = _('a simple password validate rule , it has 3 level strength rule for password,'
-                    'the simple rule just needs the password length has more than 7 simple '
-                    'characters includes digits number and alphabet characters'
-                    'the middle rule needs the password has UPPER case characters , '
-                    'lower case characters, and digits numbers'
-                    'the high rule needs the password combines with special '
-                    'characters, and UPPER case'
-                    'characters and lowe case chracters, and digits numbers.')
+    description = _(
+        'a simple password validate rule , it has 3 level strength rule for password,'
+        'the simple rule just needs the password length has more than 7 simple '
+        'characters includes digits number and alphabet characters'
+        'the middle rule needs the password has UPPER case characters , '
+        'lower case characters, and digits numbers'
+        'the high rule needs the password combines with special '
+        'characters, and UPPER case'
+        'characters and lowe case chracters, and digits numbers.',
+    )
 
     digits = 48, 57
     latin_upper = 65, 96
@@ -1049,11 +1077,13 @@ class Same(BaseRule):
         self.status = self.check()
 
     def get_message(self):
-        return self.message.format(FIELD=self.field_name,
-                                   VALUE=self.field_value,
-                                   RULE_NAME=self.name,
-                                   PARAM_FIELD=self.get_arg(0),
-                                   PARAM_VALUE=self.data.get(self.get_arg(0), None))
+        return self.message.format(
+            FIELD=self.field_name,
+            VALUE=self.field_value,
+            RULE_NAME=self.name,
+            PARAM_FIELD=self.get_arg(0),
+            PARAM_VALUE=self.data.get(self.get_arg(0), None),
+        )
 
 
 class Decimal(BaseRule):
@@ -1077,8 +1107,10 @@ class Decimal(BaseRule):
         self.check()
 
     def get_message(self):
-        return self.message.format(FIELD=self.field_name,
-                                   VALUE=self.field_value)
+        return self.message.format(
+            FIELD=self.field_name,
+            VALUE=self.field_value,
+        )
 
 
 class Exist(Unique):
@@ -1095,8 +1127,10 @@ class Exist(Unique):
 
 class UniqueAgainst(Unique):
     name = 'unique_against'
-    message = _('the given {MODEL_NAME} record is exist against '
-                'the {MODEL_FIELD} column by {MODEL_VALUE} with value {VALUE}')
+    message = _(
+        'the given {MODEL_NAME} record is exist against '
+        'the {MODEL_FIELD} column by {MODEL_VALUE} with value {VALUE}',
+    )
     description = _('check the given record weather exists in the database against the given column value')
 
     def check_model(self):
@@ -1106,10 +1140,12 @@ class UniqueAgainst(Unique):
         return not qs.exists()
 
     def get_message(self):
-        return self.message.format(MODEL_NAME=self.args[0],
-                                   MODEL_FIELD=self.args[1],
-                                   MODEL_VALUE=self.args[2],
-                                   VALUE=self.field_value)
+        return self.message.format(
+            MODEL_NAME=self.args[0],
+            MODEL_FIELD=self.args[1],
+            MODEL_VALUE=self.args[2],
+            VALUE=self.field_value,
+        )
 
 
 class MetaValidator(type):
@@ -1254,5 +1290,5 @@ default_rules = {
     Same.get_name(): Same,
     Decimal.get_name(): Decimal,
     Exist.get_name(): Exist,
-    UniqueAgainst.get_name(): UniqueAgainst
+    UniqueAgainst.get_name(): UniqueAgainst,
 }

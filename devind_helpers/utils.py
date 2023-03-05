@@ -1,6 +1,6 @@
 """Модуль со вспомогательными функциями."""
-import re
 
+import re
 from argparse import ArgumentTypeError
 from random import choice
 from string import ascii_letters
@@ -9,6 +9,7 @@ from graphql_relay import from_global_id
 
 
 def gid2int(gid: str | int) -> int | None:
+    """Преобразование к обычному идентификатору."""
     try:
         return int(gid)
     except ValueError:
@@ -19,7 +20,7 @@ def gid2int(gid: str | int) -> int | None:
 
 
 def from_gid_or_none(global_id: str | None) -> tuple[str | None, int | None]:
-    """Возвращает None в случае ошибки парсинга."""
+    """Возвращает None в случае ошибки разбора."""
     if not global_id:
         return None, None
     try:
@@ -58,5 +59,5 @@ def convert_str_to_int(value: str | bytes | None) -> int | None:
 
 
 def is_template(text: str) -> bool:
-    """Поиск шаблона в строке"""
+    """Поиск шаблона в строке."""
     return bool(re.findall('{{ .*? }}', text))

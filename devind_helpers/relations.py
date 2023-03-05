@@ -5,7 +5,7 @@ from typing import Iterable, Protocol
 
 from django.db import models
 
-__all__ = ('get_children', 'get_parents',)
+__all__ = ('get_children', 'get_parents')
 
 
 def get_children(model: type[models.Model], primary_keys: Iterable) -> list:
@@ -15,11 +15,10 @@ def get_children(model: type[models.Model], primary_keys: Iterable) -> list:
     :param primary_keys: первичные ключи
     :return: идентификаторы дочерних элементов, включая себя
     """
-
     return reduce(
         lambda a, c: a + [c, *get_children(model, model.objects.filter(parent_id=c).values_list('pk', flat=True))],
         primary_keys,
-        []
+        [],
     )
 
 
@@ -35,7 +34,6 @@ def get_parents(obj: models.Model | _WithParent) -> list:
     :param obj: запись модели
     :return: идентификаторы родительских элементов, включая себя
     """
-
     if obj.parent is None:
         return [obj.pk]
     return [obj.pk, *get_parents(obj.parent)]

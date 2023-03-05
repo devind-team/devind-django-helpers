@@ -1,3 +1,5 @@
+"""Пакет с разрешениями."""
+
 from .base_permissions import (
     BasePermission,
     ModelPermission,

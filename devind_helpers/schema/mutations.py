@@ -1,4 +1,5 @@
 """Вспомогательные мутации."""
+
 from typing import Any, Coroutine
 
 import graphene
@@ -7,7 +8,7 @@ from graphene import relay
 from graphene.utils.thenables import Promise, maybe_thenable
 from graphql import ResolveInfo
 
-from devind_helpers.schema.types import ErrorFieldType
+from .types import ErrorFieldType
 
 
 class BaseMutation(relay.ClientIDMutation):
@@ -19,7 +20,8 @@ class BaseMutation(relay.ClientIDMutation):
     success = graphene.Boolean(required=True, description='Успех мутации')
     errors = graphene.List(graphene.NonNull(ErrorFieldType), required=True, description='Ошибки мутации')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Инициализатор базовой мутации."""
         super(BaseMutation, self).__init__(*args, **kwargs)
         if self.success is None:
             self.success = True
@@ -27,14 +29,15 @@ class BaseMutation(relay.ClientIDMutation):
             self.errors = []
 
     @classmethod
-    def mutate(cls, root: Any, info: ResolveInfo, input: dict) -> Coroutine | Promise:
+    def mutate(cls, root: Any, info: ResolveInfo, input: dict) -> Coroutine | Promise:  # noqa
         """Переопределение базового метода для обработки ошибок."""
-        def on_resolve(payload):
+
+        def on_resolve(payload: Any) -> Any:
             try:
                 payload.client_mutation_id = input.get('client_mutation_id')
             except Exception:
                 raise Exception(
-                    f'Cannot set client_mutation_id in the payload object {repr(payload)}'
+                    f'Cannot set client_mutation_id in the payload object {repr(payload)}',
                 )
             return payload
 
@@ -43,11 +46,12 @@ class BaseMutation(relay.ClientIDMutation):
         except ValidationError as error:
             return maybe_thenable(
                 cls(success=False, errors=ErrorFieldType.from_messages_dict(error.message_dict)),
-                on_resolve
+                on_resolve,
             )
 
     def add_error(self, field: str, messages: list[str]) -> None:
         """Добавление ошибки.
+
         :param field: поле ошибки
         :param messages: сообщения ошибки
         """

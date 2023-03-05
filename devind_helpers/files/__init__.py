@@ -1,9 +1,16 @@
+"""Пакет для работы с файлами."""
+
 from .cleaner import (
+    Callback as DeleteCallback,
     DeleteModelFilesInfo,
     DeletedFileInfo,
-    Callback,
+    clear_apps_files,
     clear_model_field_files,
     clear_models_files,
-    clear_apps_files,
 )
-from .sign_synchronizer import SynchronizeModelFilesInfo, SynchronizedFilesInfo, Callback, synchronize_sign
+from .sign_synchronizer import (
+    Callback as SynchronizeCallback,
+    SynchronizeModelFilesInfo,
+    SynchronizedFilesInfo,
+    synchronize_sign,
+)

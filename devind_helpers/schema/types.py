@@ -1,11 +1,12 @@
 """Вспомогательные типы."""
+
 from typing import Iterable, cast
 
 import graphene
 from flatten_dict import flatten
 from graphene import ObjectType
 
-from devind_helpers.import_from_file import ImportFromFile
+from ..import_from_file import ImportFromFile
 
 
 class ErrorFieldType(ObjectType):
@@ -42,7 +43,7 @@ class TableCellType(ObjectType):
     header = graphene.String(required=True, description='Заголовок ячейки')
     value = graphene.String(default_value='-', description='Значение ячейки')
     align = graphene.String(default_value='left', description='Выравнивание')
-    type = graphene.String(default_value='string', description='Тип ячейки')
+    type = graphene.String(default_value='string', description='Тип ячейки')  # noqa
 
 
 class TableRowType(ObjectType):
@@ -59,8 +60,9 @@ class TableType(ObjectType):
     rows = graphene.List(TableRowType, required=True, description='Строки документа')
 
     @classmethod
-    def from_iff(cls, iff: ImportFromFile):
+    def from_iff(cls, iff: ImportFromFile) -> 'TableType':
         """Получение из класса импорта данных из файла.
+
         :param iff: класс импорта данных из файла
         """
         rows: list[TableRowType] = []
@@ -79,9 +81,10 @@ class SetSettingsInputType(graphene.InputObjectType):
 
 
 class ActionRelationShip(graphene.Enum):
-    """Типы изменения связей между записями в базе данных
-        - ADD - Добавление
-        - DELETE - Удаление
+    """Типы изменения связей между записями в базе данных.
+
+    - ADD - Добавление
+    - DELETE - Удаление
     """
 
     ADD = 1
@@ -89,16 +92,17 @@ class ActionRelationShip(graphene.Enum):
 
 
 class ConsumerActionType(graphene.Enum):
-    """Типы уведомления пользователей
-        - CONNECT - Присоединился
-        - DISCONNECT - Отсоединился
-        - ADD - Пользователь добавил данные (по умолчанию)
-        - CHANGE - Пользователь изменил данные
-        - DELETE - Удаление объекта
-        - ERROR - Ошибка ввода данных
-        - TYPING - Печатает, готовиться отправить сообщение
-        - TYPING_FINISH - Закончил печатать
-        - EXCEPTION - Пользователь исключен из потока уведомлений
+    """Типы уведомления пользователей.
+
+    - CONNECT - Присоединился
+    - DISCONNECT - Отсоединился
+    - ADD - Пользователь добавил данные (по умолчанию)
+    - CHANGE - Пользователь изменил данные
+    - DELETE - Удаление объекта
+    - ERROR - Ошибка ввода данных
+    - TYPING - Печатает, готовиться отправить сообщение
+    - TYPING_FINISH - Закончил печатать
+    - EXCEPTION - Пользователь исключен из потока уведомлений
     """
 
     CONNECT = 1

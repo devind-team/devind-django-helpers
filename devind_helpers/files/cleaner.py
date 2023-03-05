@@ -3,32 +3,32 @@
 from dataclasses import dataclass
 from functools import reduce
 from os import path, remove
-from typing import cast, Callable, Iterable
+from typing import Callable, Iterable, cast
 
-from django.apps import apps, AppConfig
+from django.apps import AppConfig, apps
 from django.conf import settings
-from django.db.models import Model, Field, FileField
+from django.db.models import Field, FileField, Model
 
 from .utils import get_existing_paths
 
 
 @dataclass(frozen=True)
 class DeleteModelFilesInfo:
-    """Информация о файлах модели для удаления"""
+    """Информация о файлах модели для удаления."""
 
-    app: AppConfig      # Приложение
+    app: AppConfig  # Приложение
     model: type[Model]  # Модель
-    field: Field        # Поле модели
-    delete_count: int   # Количество удаляемых файлов
+    field: Field  # Поле модели
+    delete_count: int  # Количество удаляемых файлов
 
 
 @dataclass(frozen=True)
 class DeletedFileInfo:
-    """Информация об удаленном файле"""
+    """Информация об удаленном файле."""
 
     files_info: DeleteModelFilesInfo  # Информация о файлах модели для удаления
-    path: str                         # Путь к файлу
-    index: int                        # Индекс файла
+    path: str  # Путь к файлу
+    index: int  # Индекс файла
 
 
 Callback = Callable[[DeletedFileInfo], None]
@@ -41,23 +41,21 @@ def clear_model_field_files(model: type[Model], field_name: str, callback: Callb
     :param field_name: название поля модели
     :param callback: функция обратного вызова для получения информации об удаляемых файлах
     """
-
-    field = model._meta.get_field(field_name)
+    field = model._meta.get_field(field_name)  # noqa
     if not isinstance(field, FileField):
         raise ValueError(f'Поле {field} не является экземпляром {FileField.__name__}')
-    file_fields = [f for f in model._meta.get_fields() if isinstance(f, FileField)]
-    _clear_model_field_files(model._meta.app_config, model, file_fields, field, callback)
+    file_fields = [f for f in model._meta.get_fields() if isinstance(f, FileField)]  # noqa
+    _clear_model_field_files(model._meta.app_config, model, file_fields, field, callback)  # noqa
 
 
 def clear_models_files(models: Iterable[type[Model]], callback: Callback | None = None) -> None:
     """Удаление лишних файлов моделей.
-    
+
     :param models: модели
     :param callback: функция обратного вызова для получения информации об удаляемых файлах
     """
-
     for model in models:
-        _clear_model_files(model._meta.app_config, model, callback)
+        _clear_model_files(model._meta.app_config, model, callback)  # noqa
 
 
 def clear_apps_files(app_labels: Iterable[str], callback: Callback | None = None) -> None:
@@ -66,7 +64,6 @@ def clear_apps_files(app_labels: Iterable[str], callback: Callback | None = None
     :param app_labels: названия приложений, в которых необходимо удалить файлы
     :param callback: функция обратного вызова для получения информации об удаляемых файлах
     """
-
     for app_name in app_labels:
         app: AppConfig = apps.get_app_config(app_name)
         for model in cast(Iterable[type[Model]], app.get_models()):
@@ -80,8 +77,7 @@ def _clear_model_files(app: AppConfig, model: type[Model], callback: Callback | 
     :param model: модель
     :param callback: функция обратного вызова для получения информации об удаляемых файлах
     """
-
-    file_fields = [f for f in model._meta.get_fields() if isinstance(f, FileField)]
+    file_fields = [f for f in model._meta.get_fields() if isinstance(f, FileField)]  # noqa
     for field in file_fields:
         _clear_model_field_files(app, model, file_fields, field, callback)
 
@@ -101,12 +97,11 @@ def _clear_model_field_files(
     :param file_field: файловое поле модели для удаления
     :param callback: функция обратного вызова для получения информации об удаляемых файлах
     """
-
     existing_paths = get_existing_paths(file_field)
     db_paths = reduce(
-        lambda acc, field: acc | set(model.objects.values_list(field.name, flat=True)),
+        lambda a, field: a | set(model.objects.values_list(field.name, flat=True)),
         file_fields,
-        set()
+        set(),
     )
     paths_to_delete = existing_paths - db_paths
     model_files_info = DeleteModelFilesInfo(app, model, file_field, len(paths_to_delete))

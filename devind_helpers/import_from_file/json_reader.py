@@ -9,7 +9,7 @@ from .base_reader import BaseReader
 class JsonReader(BaseReader):
     """Считыватель из формата json."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         """Конструктор считывателя из формата json.
 
         :param path: путь к файлу
@@ -19,5 +19,5 @@ class JsonReader(BaseReader):
     @property
     def items(self) -> Iterable:
         """Перебираем строки."""
-        for row in json.load(open(self.path, encoding='utf-8')):
-            yield row
+        with open(self.path, encoding='utf-8') as f:
+            yield from json.load(f)

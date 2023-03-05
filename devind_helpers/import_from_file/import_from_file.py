@@ -1,6 +1,7 @@
 """Модуль импорта данных из файла."""
+
 from os.path import splitext
-from typing import TypeVar, Generic, Protocol, Iterable, Any
+from typing import Any, Generic, Iterable, Protocol, TypeVar
 
 from django.db import models, transaction
 from flatten_dict.flatten_dict import flatten
@@ -15,30 +16,33 @@ Errors = dict[str, dict[str, str]]
 ItemError = tuple[int, Errors]
 Relative = tuple[type[Validator], type[models.Model]]
 
-
 Model = TypeVar('Model', bound=models.Model)
 
 
 class BeforeCreate(Protocol):
+    """Хук, вызываемый перед созданием объекта."""
+
     def __call__(
         self,
         mdl: type[Model],
         data: dict,
         separated_data: dict | None,
-        index: int
+        index: int,
     ) -> tuple[dict, dict] | None:
         """Хук, вызываемый перед созданием объекта.
 
         :param mdl: модель
-        :param data: данные, которые будут использованны для создания объекта
+        :param data: данные, которые будут использованы для создания объекта
         :param separated_data: отделенные данные
         :param index: индекс создаваемого объекта
-        :return: (данные, которые будут использованны для создания объекта; отделенные данные)
+        :return: (данные, которые будут использованы для создания объекта; отделенные данные)
         """
         ...
 
 
 class Created(Protocol):
+    """Хук, вызываемый после создания объекта."""
+
     def __call__(self, obj: Model, data: dict, separated_data: dict | None, index: int) -> Any:
         """Хук, вызываемый после создания объекта.
 
@@ -57,7 +61,7 @@ class ImportFromFile(Generic[Model]):
     _readers = {
         '.xlsx': ExcelReader,
         '.csv': CsvReader,
-        '.json': JsonReader
+        '.json': JsonReader,
     }
 
     def __init__(
@@ -68,8 +72,8 @@ class ImportFromFile(Generic[Model]):
         relative: dict[str, Relative] | None = None,
         introduction: dict | None = None,
         ratio: Ratio = None,
-        required_keys: list[str] | None = None
-    ):
+        required_keys: list[str] | None = None,
+    ) -> None:
         """Конструктор импорта данных из файла.
 
         :param model: модель
@@ -134,7 +138,7 @@ class ImportFromFile(Generic[Model]):
         self,
         keys: Iterable[str],
         ratio: Ratio | None = None,
-        validator: type[Validator] | None = None
+        validator: type[Validator] | None = None,
     ) -> None:
         """Отделение некоторых полей для специфической записи в базу данных.
 
@@ -142,7 +146,6 @@ class ImportFromFile(Generic[Model]):
         :param ratio: отображение полей
         :param validator: валидатор для проверки отделенных данных
         """
-
         self.separated_keys = keys
         self.separated_ratio = ratio
         self.separated_validator = validator
@@ -152,7 +155,6 @@ class ImportFromFile(Generic[Model]):
 
         :return: (успех валидации, список ошибок валидации элементов)
         """
-
         status = True
         errors: list[ItemError] = []
         if self.validator:
@@ -161,10 +163,10 @@ class ImportFromFile(Generic[Model]):
                 validator = self.validator(data)
                 status = validator.validate()
                 related_status, related_errors = self._validate_related(
-                    {k: v for k, v in item.items() if isinstance(v, dict)}
+                    {k: v for k, v in item.items() if isinstance(v, dict)},
                 )
                 if not (status and related_status):
-                    errors.append((i, {**validator.get_message(), **related_errors},))
+                    errors.append((i, {**validator.get_message(), **related_errors}))
                     status = False
         if self.separated_items and self.separated_validator:
             for i, separated_item in enumerate(self.separated_items):
@@ -179,7 +181,7 @@ class ImportFromFile(Generic[Model]):
     def run(
         self,
         before_create: BeforeCreate | None = None,
-        created: Created | None = None
+        created: Created | None = None,
     ) -> list[Model | Any]:
         """Запуск процедуры заполнения базы данных.
 
@@ -187,8 +189,7 @@ class ImportFromFile(Generic[Model]):
         :param created: хук, вызываемый после создания объекта
         :return: созданные записи
         """
-
-        from .exceptions import HookItemException, ItemsException
+        from .exceptions import HookItemError, ItemsError
 
         result: list[Model | Any] = []
         errors: list[ItemError] = []
@@ -201,7 +202,7 @@ class ImportFromFile(Generic[Model]):
                         mdl=self.model,
                         data=data,
                         separated_data=separated_data,
-                        index=i
+                        index=i,
                     )
                     if before_create_result is not None:
                         data, separated_data = before_create_result
@@ -215,10 +216,10 @@ class ImportFromFile(Generic[Model]):
                         result.append(obj)
                 else:
                     result.append(obj)
-            except HookItemException as ex:
+            except HookItemError as ex:
                 errors.append(ex.error)
         if len(errors):
-            raise ItemsException(errors)
+            raise ItemsError(errors)
         return result
 
     def _modify_item(self, item: dict) -> dict:
@@ -227,7 +228,6 @@ class ImportFromFile(Generic[Model]):
         :param item: элемент для модификации
         :return: модифицированный элемент
         """
-
         data = {k: v for k, v in item.items() if bool(v) and not isinstance(v, dict)}
         if self.introduction is not None:
             data = {**data, **self.introduction}
@@ -243,7 +243,6 @@ class ImportFromFile(Generic[Model]):
         :param separated_item: элемент для модификации
         :return: модифицированный элемент
         """
-
         data = {k: v for k, v in separated_item.items() if bool(v)}
         if self.separated_ratio is None:
             return data
@@ -256,7 +255,6 @@ class ImportFromFile(Generic[Model]):
         :param parent: родительский путь
         :return: (успех валидации, список ошибок валидации элемента)
         """
-
         if related and self.relative is None:
             raise ValueError(f'Отсутствует meta_validators для проверки вложенности: {related}')
         status = True
@@ -266,21 +264,22 @@ class ImportFromFile(Generic[Model]):
                 raise ValueError(f'В meta_validators отсутствует валидатор для поля {field}')
             validator = self.relative[field][0]({k: v for k, v in values.items() if not isinstance(v, dict)})
             status = validator.validate()
-            related_status, related_errors = self._validate_related({
-                k: v for k, v in values.items() if isinstance(v, dict)
-            }, f'{field}.')
+            related_status, related_errors = self._validate_related(
+                {
+                    k: v for k, v in values.items() if isinstance(v, dict)
+                }, f'{field}.',
+            )
             if not (status and related_status):
                 errors = {**{f'{parent}{field}.{k}': v for k, v in validator.get_message().items()}, **related_errors}
                 status = False
         return status, errors
 
-    def _create_related(self, related_data: dict, parent: Model):
+    def _create_related(self, related_data: dict, parent: Model) -> None:
         """Создание связанных элементов.
 
         :param related_data: данные связанных элементов
         :param parent: родительский объект модели
         """
-
         for field, values in related_data.items():
             obj = self.relative[field][1].objects.create(
                 **{'pk': parent.pk, **{k: v for k, v in values.items() if not isinstance(v, dict)}}
